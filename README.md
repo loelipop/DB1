@@ -10,3 +10,7 @@
 密碼：test1234
 賦予使用者 hj 資料庫 coursedb 的完整權限
 進入資料庫 testdb 並匯入 coursedb.sql
+
+點選xampp中的explorer
+將coursephp的資料夾放入htdocs資料夾中
+用瀏覽器開啓http://localhost/coursephp/course.php
