@@ -71,12 +71,14 @@
         }
         echo "</table>";
         echo "<p>已選總學分數： " . $total_credit . "</p>";
+        //退選按鈕以及文字欄
         echo "<tr><td colspan='7'>";
         echo "<form method='post' action=''>";
         echo "輸入課程編號退選：<input type='text' name='drop_course_id' required>";
         echo "<button type='submit'>退選</button>";
         echo "</form>";
         echo "</td></tr>";
+        //是否要退選
         if(isset($row["course_id"]) && $row["course_id"] != $_POST["drop_course_id"]) {
           $sql = "SELECT * FROM course WHERE course_id='".$_POST["drop_course_id"]."'";
           $result = $conn->query($sql);
