@@ -3,7 +3,7 @@
 以系統管理員身分執行 XAMPP Control Panel
 按下 Apache 和 MySQL 的 Start
 按下 MySQL 的 Admin 開啟 phpMyAdmin 介面
-建立資料庫 coursedb
+建立資料庫名稱：coursedb
 建立使用者
 帳號：hj
 主機名稱：localhost
