@@ -7,11 +7,7 @@
   <p><h2>學生選課系統</h2></p>
 </center>
   <body>
-    <h2>輸入學號</h2>
-    <form method="post" action="">
-      <input type="text" name="student_id" required>
-      <button type="submit">查詢</button>
-    </form>
+
 
     <?php
     // 資料庫連接資訊
@@ -48,6 +44,14 @@
       }
     }
 
+    if(!isset($_POST["student_id"])&& !isset($_GET["action"])){
+      echo'<h2>輸入學號</h2>
+      <form method="post" action="">
+        <input type="text" name="student_id" required>
+        <button type="submit">查詢</button>
+      </form>';
+    }
+
     // 檢查是否要顯示已選課表
     if (isset($_GET["action"]) && $_GET["action"] == "show_courses") {
       // 取得學生已選課表資訊
@@ -71,57 +75,6 @@
         }
         echo "</table>";
         echo "<p>已選總學分數： " . $total_credit . "</p>";
-        //退選按鈕以及文字欄
-        echo "<tr><td colspan='7'>";
-        echo "<form method='post' action=''>";
-        echo "輸入課程編號退選：<input type='text' name='drop_course_id' required>";
-        echo "<button type='submit'>退選</button>";
-        echo "</form>";
-        echo "</td></tr>";
-        //是否要退選
-        if(isset($row["course_id"]) && $row["course_id"] != $_POST["drop_course_id"]) {
-          $sql = "SELECT * FROM course WHERE course_id='".$_POST["drop_course_id"]."'";
-          $result = $conn->query($sql);
-
-          if($result->num_rows > 0){
-            $row = $result->fetch_assoc();
-
-            //檢查是否為必修
-            if($row["course_type"] == "必修") {
-              echo "必修無法退選";
-            } else {
-              // 取得學生已選課程學分總和
-              $sql = "SELECT course_credit FROM course INNER JOIN courseselection ON course.course_id = courseselection.course_id WHERE student_id = '".$_GET["student_id"]."'";
-              $result = $conn->query($sql);
-              $total_credit = 0;
-              while ($row = $result->fetch_assoc()) {
-                if ($row["course_id"] != $_POST["drop_course_id"]) {
-                  $total_credit += $row["course_credit"];
-                }
-              }
-
-              //檢查學分是否低於9分
-              if($total_credit < 9){
-                echo "已選總學分數不能低於9分，無法退選";
-              } else {
-
-                //進行退選
-                $sql = "DELETE FROM courseselection WHERE student_id='".$_GET["student_id"]."' AND course_id='".$_POST["drop_course_id"]."'";
-                if($conn->query($sql) === TRUE) {
-                  echo "退選成功";
-
-                  //更新課程人數
-                  $sql = "UPDATE course SET current_student = (current_student - 1)";
-                  $conn->query($sql);
-                }else{
-                  echo "退選失敗" . $conn->error;
-                }
-              }
-            }
-          }else{
-            echo "查無此課";
-          }
-        }
     } else {
       echo "尚未選課";
     }
@@ -131,4 +84,5 @@
   $conn->close();
   ?>
 
-
+  </body>
+</html>
