@@ -51,22 +51,49 @@
         <button type="submit">查詢</button>
       </form>';
     }
+    
+     // 檢查是否有 POST 請求
+  if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // 從 POST 請求中獲取學生選擇的課程 ID
+    $course_id = $_POST["course_id"];
 
-    // 檢查學生是否已經加選了該課程
+    // 從 SESSION 中獲取當前登錄的學生 ID
+    session_start();
+    $student_id = $_SESSION["student_id"];
+
+    // 檢查是否已經加選了該課程
     $sql = "SELECT * FROM courseselection WHERE student_id = '$student_id' AND course_id = '$course_id'";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
-      echo "You have already selected this course.";
+      echo "您已加選此課程.";
     } else {
-      // 如果學生還沒有加選該課程，則將其加入 course_selection 資料表中
-      $sql = "INSERT INTO courseselection (student_id, course_id) VALUES ('$student_id', '$course_id')";
-      if ($conn->query($sql) === TRUE) {
-        echo "Course selected successfully.";
-      } else {
-        echo "Error selecting course: " . $conn->error;
+      // 檢查該課程是否已滿
+      $sql = "SELECT * FROM courses WHERE id = '$course_id'";
+      $result = $conn->query($sql);
+      if ($result->num_rows > 0) {
+        $course = $result->fetch_assoc();
+        if ($course["current_student"] >= $course["max_student"]) {
+          echo "課程已滿";
+        } 
       }
     }
-  }
+        // 檢查學生已經選擇的課程的總學分是否超過最高學分限制
+    $sql = "SELECT SUM(course_credit) as total_credit FROM courseselection JOIN courses ON courseselection.course_id = courses.id WHERE courseselection.student_id = '$student_id'";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $total_credit = $row["total_credit"] + $course["course_credit"];
+      if ($total_credit > 30) {
+        echo "超過學分限制.";
+        exit();
+      }
+    }
+          // 檢查是否與已選課程同名
+          $sql = "SELECT * FROM courseselection JOIN courses ON courseselection.course_id = courses.id WHERE courseselection.student_id = '$student_id' AND courses.course_name = '{$course["course_name"]}'";
+          $result = $conn->query($sql);
+          if ($result->num_rows > 0) {
+            echo "課程同名";
+         
     
     // 檢查是否要顯示已選課表
     if (isset($_GET["action"]) && $_GET["action"] == "show_courses") {
