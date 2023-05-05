@@ -51,23 +51,15 @@
         <button type="submit">查詢</button>
       </form>';
     }
-    
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // 從 POST 請求中獲取學生選擇的課程 ID
-    $course_id = $_POST["course_id"];
-
-    // 從 SESSION 中獲取當前登錄的學生 ID
-    session_start();
-    $student_id = $_SESSION["student_id"];
 
     // 檢查學生是否已經加選了該課程
-    $sql = "SELECT * FROM course_selection WHERE student_id = '$student_id' AND course_id = '$course_id'";
+    $sql = "SELECT * FROM courseselection WHERE student_id = '$student_id' AND course_id = '$course_id'";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
       echo "You have already selected this course.";
     } else {
       // 如果學生還沒有加選該課程，則將其加入 course_selection 資料表中
-      $sql = "INSERT INTO course_selection (student_id, course_id) VALUES ('$student_id', '$course_id')";
+      $sql = "INSERT INTO courseselection (student_id, course_id) VALUES ('$student_id', '$course_id')";
       if ($conn->query($sql) === TRUE) {
         echo "Course selected successfully.";
       } else {
