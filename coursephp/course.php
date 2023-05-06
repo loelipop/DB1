@@ -36,12 +36,15 @@
         echo "學號：" . $row["student_id"] . "<br>";
         echo "姓名：" . $row["student_name"] . "<br>";
         echo "系級：" . $row["department_name"] . "<br>";
+		
+		// 顯示已選課表按鈕
+		echo '<button onclick="location.href=\'?action=show_courses&student_id='.$row["student_id"].'\'">已選課表</button>';
 
-        // 顯示已選課表按鈕
-        echo '<button onclick="location.href=\'?action=show_courses&student_id='.$row["student_id"].'\'">已選課表</button>';
-      } else {
-        echo "查無此學生";
-      }
+		// 顯示重新輸入學號的按鈕
+		echo '<button onclick="location.href=\'\'">重新輸入學號</button>';
+	  } else {
+		echo "查無此學生";
+	  }
     }
 
     if(!isset($_POST["student_id"])&& !isset($_GET["action"])){
