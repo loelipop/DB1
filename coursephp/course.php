@@ -118,6 +118,62 @@
         }
         echo "</table>";
         echo "<p>已選總學分數： " . $total_credit . "</p>";
+        //退選
+        if(isset($_POST["drop_course_id"])) {
+          $sql = "SELECT * FROM course WHERE course_id='".$_POST["drop_course_id"]."'";
+          $result = $conn->query($sql);
+          if($result->num_rows > 0){
+            $row = $result->fetch_assoc();
+            //檢查是否為必修
+            if($row["course_type"] == "必修") {
+              echo "必修無法退選";
+            } else {
+              // 取得學生已選課程學分總和
+              $sql = "SELECT course_credit FROM course INNER JOIN courseselection ON course.course_id = courseselection.course_id WHERE student_id = '".$_GET["student_id"]."'";
+              $result = $conn->query($sql);
+              
+              while ($row = $result->fetch_assoc()) {
+                if ($row["course_id"] != $_POST["drop_course_id"]) {
+                  $total_credit += $row["course_credit"];
+                }
+              }
+              //檢查學分是否低於9分
+              if($total_credit - $course_credit < 9){
+                echo "已選總學分數不能低於9分，無法退選";
+              } else {
+                //進行退選
+                $sql = "DELETE FROM courseselection WHERE student_id='".$_GET["student_id"]."' AND course_id='".$_POST["drop_course_id"]."'";
+                if($conn->query($sql) === TRUE) {
+                  echo "退選成功";
+                  //取的已選課表資訊
+                  $sql = "SELECT course.course_id,course.course_name,course.time,course.day,course.course_credit,course.course_type,course.teachers_name FROM course INNER JOIN courseselection ON course.course_id = courseselection.course_id WHERE student_id = '".$_GET["student_id"]."'ORDER BY course.day ASC, course.time ASC";
+                  $result = $conn->query($sql);
+                  //更新課程人數
+                  $sql = "UPDATE course SET current_student = (current_student - 1)";
+                  $conn->query($sql);
+                  //顯示退選後的課表
+                  // echo "<h2>已選課表</h2>";
+                  // echo "<table>";
+                  // echo "<tr><th>課程編號</th><th>課程名稱</th><th>時段</th><th>上課日</th><th>學分數</th><th>課程類別</th><th>教師姓名</th></tr>";
+                  // mysqli_data_seek($result, 0);
+                  // while($row = $result->fetch_assoc()) {
+                  //   echo "<tr><td style='text-align: center;'>" . $row["course_id"] . "</td><td style='text-align: center;'>" . $row["course_name"] . "</td><td style='text-align: center;'>" . $row["time"] . "</td><td style='text-align: center;'>". $row["day"] . "</td><td style='text-align: center;'>". $row["course_credit"] . "</td><td style='text-align: center;'>". $row["course_type"] . "</td><td style='text-align: center;'>". $row["teachers_name"] . "</td></tr>";
+                  // }
+                  // echo "</table>";
+                  // echo "<p>已選總學分數： " . $total_credit . "</p>";
+                }else{
+                  echo "退選失敗" . $conn->error;
+                }
+              }
+            }
+          }else{
+            echo "查無此課";
+          }
+        }
+    } else {
+      echo "尚未選課";
+    }
+  }
     } else {
       echo "尚未選課";
     }
