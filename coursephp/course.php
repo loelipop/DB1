@@ -70,6 +70,10 @@
 
         // 顯示已選課表資訊和已選總學分數
         echo "<h2>已選課表</h2>";
+		
+		// 新增返回主頁的按鈕
+		echo '<button onclick="window.history.back()">返回主頁</button>';
+		
         echo "<table>";
         echo "<tr><th>課程編號</th><th>課程名稱</th><th>時段</th><th>上課日</th><th>學分數</th><th>課程類別</th><th>教師姓名</th></tr>";
         mysqli_data_seek($result, 0);
