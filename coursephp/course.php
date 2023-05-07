@@ -40,7 +40,9 @@
 		
 		// 顯示已選課表按鈕
 		echo '<button onclick="location.href=\'?action=show_courses&student_id='.$row["student_id"].'\'">已選課表</button>';
-
+    echo "<br>";
+    echo '<button onclick="location.href=\'?action=add_courses&student_id='.$row["student_id"].'\'">可加選課表</button>';
+    echo "<br>";
 		// 顯示重新輸入學號的按鈕
 		echo '<button onclick="location.href=\'\'">重新輸入學號</button>';
 	  } else {
@@ -56,6 +58,63 @@
       </form>';
     }
 
+    if(isset($_GET["action"]) && $_GET["action"] == "add_courses"){
+      $sql="SELECT * FROM course";
+      $result = $conn->query($sql);
+      if($result->num_rows > 0){
+         // 顯示已選課表資訊和已選總學分數
+         echo "<h2>可加選課表</h2>";
+		
+         // 新增返回主頁的按鈕
+         echo '<button onclick="window.history.back()">返回主頁</button>';
+     
+         echo "<table>";
+         echo "<tr><th>課程編號</th><th>課程名稱</th><th>時段</th><th>上課日</th><th>學分數</th><th>課程類別</th><th>年級</th><th>教師姓名</th><th>系所</th><th>最多可收</th><th>現在修課人數</th></tr>";
+        
+        while($row = $result->fetch_assoc()) {
+          echo "<tr><td style='text-align: center;'>" . $row["course_id"] . "</td><td style='text-align: center;'>" . $row["course_name"] . "</td><td style='text-align: center;'>" . $row["time"] . "</td><td style='text-align: center;'>". $row["day"] . "</td><td style='text-align: center;'>". $row["course_credit"] . "</td><td style='text-align: center;'>". $row["course_type"] . "</td><td style='text-align: center;'>" . $row["grade"] ."</td><td style='text-align: center;'>". $row["teachers_name"] . "</td><td style='text-align: center;'>" . $row["department_name"] ."</td><td style='text-align: center;'>" . $row["max_student"] ."</td><td style='text-align: center;'>" . $row["current_student"] ."</td></tr>";
+        }
+        echo "</table>";
+
+        echo "<form method='post' action=''>";
+        echo "輸入課程編號加選：<input type='text' name='add_course_id' required>";
+        echo "<button type='submit'>加選</button>";
+        echo "</form>";
+        echo "</td></tr>";
+
+        if(isset($_POST["add_course_id"])){
+          $sql = "SELECT * FROM course WHERE course_id='".$_POST["add_course_id"]."'";
+          $result = $conn->query($sql);
+          if($result->num_rows > 0){
+            $row = $result->fetch_assoc();
+            $selectedCourseName = $row["course_name"];
+            $selectedCourseTime = $row["time"];
+            $selectedCourseDay = $row["day"];
+
+            // 拆分加選課程的時間段
+            $selectedCourseTimeParts = explode("~", $selectedCourseTime);
+            $selectedCourseStartTime = $selectedCourseTimeParts[0];
+            $selectedCourseEndTime = $selectedCourseTimeParts[1];
+
+            $sql = "SELECT course.course_name
+            FROM student
+            INNER JOIN courseselection ON student.student_id = courseselection.student_id
+            INNER JOIN course ON courseselection.course_id = course.course_id
+            WHERE student.student_id = '".$_GET["student_id"]."' AND course.day = '$selectedCourseDay' AND ((course.time >= '$selectedCourseStartTime' AND course.time <= '$selectedCourseEndTime')
+            OR (SUBSTRING_INDEX(course.time, '~', -1) >= '$selectedCourseStartTime' AND SUBSTRING_INDEX(course.time, '~', -1) <= '$selectedCourseEndTime'))";
+            $result = $conn->query($sql);
+            if ($result->num_rows > 0) {
+              // 衝堂不可加選
+              echo "衝堂不可加選";
+          } else {
+              // 可以加選課程
+              echo "加選成功";
+          }
+          }
+        }
+      }
+    }
+    
     // 檢查是否要顯示已選課表
     if (isset($_GET["action"]) && $_GET["action"] == "show_courses") {
       // 取得學生已選課表資訊
@@ -130,6 +189,8 @@
       echo "尚未選課";
     }
   }
+
+  
 
   // 關閉連接
   $conn->close();
