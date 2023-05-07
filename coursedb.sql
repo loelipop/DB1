@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2023 at 10:44 AM
+-- Generation Time: May 07, 2023 at 04:11 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -47,7 +47,9 @@ CREATE TABLE `course` (
 
 INSERT INTO `course` (`course_id`, `course_name`, `course_credit`, `course_type`, `teachers_name`, `max_student`, `current_student`, `time`, `day`, `department_name`, `grade`) VALUES
 (879, '流體力學', 3, '必修', '黃振家', 60, 56, '0910~1200', 3, '土木工程系', 2),
+(893, '工程地質', 2, '必修', '紀昭銘', 60, 57, '0910~1100', 2, '土木工程系', 3),
 (895, '鋼結構設計', 3, '必修', '王起平', 60, 44, '0910~1200', 3, '土木工程系', 3),
+(896, '營建管理', 3, '必修', '林保宏', 60, 57, '1410~1700', 4, '土木工程系', 3),
 (901, '工程測量', 2, '選修', '林建良', 60, 56, '2025~2210', 3, '土木工程系', 3),
 (906, '深開挖分析原理及程式應用', 3, '選修', '陳廣祥', 60, 27, '1830~2115', 3, '土木工程系', 3),
 (908, '量測系統學', 2, '選修', '廖為忠', 60, 13, '1410~1600', 2, '土木工程系', 3),
@@ -73,6 +75,79 @@ INSERT INTO `course` (`course_id`, `course_name`, `course_credit`, `course_type`
 (2494, '數位光學造影技術', 3, '選修', '林昱志', 40, 9, '0910~1200', 4, '光電科學與工程學系', 3),
 (2495, '積體光學', 3, '選修', '羅仕守', 60, 34, '1830~2115', 1, '光電科學與工程學系', 3);
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `courseselection`
+--
+
+CREATE TABLE `courseselection` (
+  `student_id` varchar(10) NOT NULL,
+  `course_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `courseselection`
+--
+
+INSERT INTO `courseselection` (`student_id`, `course_id`) VALUES
+('D0860618', 893),
+('D0860618', 895),
+('D0860618', 896),
+('D0860618', 906),
+('D0860618', 908),
+('D0945297', 1260),
+('D0945297', 1261),
+('D0945297', 1262),
+('D0945297', 1263),
+('D0945297', 1265),
+('D0945297', 1269),
+('D0945297', 1334),
+('D1031125', 1200),
+('D1031125', 1260),
+('D1031125', 1261),
+('D1031125', 1262),
+('D1031125', 1263),
+('D1031125', 1264),
+('D1031125', 1265),
+('D1031125', 1269),
+('D1061139', 2480),
+('D1061139', 2484),
+('D1061139', 2485),
+('D1061139', 2494),
+('D1061139', 2495),
+('D1095589', 1260),
+('D1095589', 1261),
+('D1095589', 1262),
+('D1095589', 1263),
+('D1095589', 1264),
+('D1095589', 1265),
+('D1095589', 1269);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student`
+--
+
+CREATE TABLE `student` (
+  `student_id` varchar(255) NOT NULL,
+  `student_name` varchar(255) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
+  `grade` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `student`
+--
+
+INSERT INTO `student` (`student_id`, `student_name`, `department_name`, `grade`) VALUES
+('D0860618', '孫嘉謙', '土木工程系', 3),
+('D0945297', '林若安', '資訊工程系', 3),
+('D1031125', '羅駿祥', '資訊工程系', 2),
+('D1061139', '秦靜祥', '光電科學與工程學系\r\n', 3),
+('D1095589', '盧重毓', '資訊工程系', 2);
+
 --
 -- Indexes for dumped tables
 --
@@ -82,6 +157,30 @@ INSERT INTO `course` (`course_id`, `course_name`, `course_credit`, `course_type`
 --
 ALTER TABLE `course`
   ADD PRIMARY KEY (`course_id`);
+
+--
+-- Indexes for table `courseselection`
+--
+ALTER TABLE `courseselection`
+  ADD PRIMARY KEY (`student_id`,`course_id`),
+  ADD KEY `course_id` (`course_id`);
+
+--
+-- Indexes for table `student`
+--
+ALTER TABLE `student`
+  ADD PRIMARY KEY (`student_id`);
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `courseselection`
+--
+ALTER TABLE `courseselection`
+  ADD CONSTRAINT `course_id` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `student_id` FOREIGN KEY (`student_id`) REFERENCES `student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
