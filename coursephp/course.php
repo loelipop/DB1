@@ -130,19 +130,34 @@
                 // 已經選修了相同課名但不同課號的課程
                 echo "不能選修相同課名的課程";
               }else{
-                $sql = "INSERT INTO courseselection (student_id, course_id) VALUES ('".$_GET["student_id"]."', '$selectedCourseId')";
-                if($conn->query($sql) == TRUE && mysqli_affected_rows($conn) > 0) {
-                  echo "加選成功";
-                  $sql = "UPDATE course SET current_student = (current_student + 1)";
-                  $conn->query($sql);
-              }
+                $sql = "SELECT current_student,max_student FROM course WHERE course_id ='$selectedCourseId'";
+                $result= $conn->query($sql);
+                if($result->num_rows > 0){
+                  $row = $result->fetch_assoc();
+                  $current_student_count = $row["current_student"];
+                  $course_max_students = $row["max_student"];
+                  // 判断当前已选人数是否达到了课程的限制人数
+                  if($current_student_count >= $course_max_students){
+                    echo "課程已滿無法選課";
+                  }else{
+                    $sql = "INSERT INTO courseselection (student_id, course_id) VALUES ('".$_GET["student_id"]."', '$selectedCourseId')";
+                  if($conn->query($sql) == TRUE && mysqli_affected_rows($conn) > 0) {
+                    echo "加選成功";
+                    $sql = "UPDATE course SET current_student = (current_student + 1)";
+                    $conn->query($sql);
+                  }
+                  }
+                }
             }
             }
+            }
+          }else{
+            echo "課程編號不存在";
           }
         }
         }
       }
-    }
+    
     
     // 檢查是否要顯示已選課表
     if (isset($_GET["action"]) && $_GET["action"] == "show_courses") {
