@@ -95,35 +95,67 @@
             $selectedCourseTimeParts = explode("~", $selectedCourseTime);
             $selectedCourseStartTime = $selectedCourseTimeParts[0];
             $selectedCourseEndTime = $selectedCourseTimeParts[1];
+		// 檢查學生已經選擇的課程的總學分是否超過最高學分限制
+		    $sql = "SELECT SUM(course_credit) as total_credit FROM courseselection JOIN course ON courseselection.course_id = course.id WHERE courseselection.student_id = '$student_id'";
+		    $result = $conn->query($sql);
+		    if ($result->num_rows > 0) {
+		      $row = $result->fetch_assoc();
+		      $total_credit = $row["total_credit"] + $course["credit"];
+		      if ($total_credit > 30) {
+			echo "學分已達最高上限";
+		      }
+			 else{
+				 $sql = "SELECT course.course_name
+				    FROM student
+				    INNER JOIN courseselection ON student.student_id = courseselection.student_id
+				    INNER JOIN course ON courseselection.course_id = course.course_id
+				    WHERE student.student_id = '".$_GET["student_id"]."' AND course.day = '$selectedCourseDay' AND ((course.time >= '$selectedCourseStartTime' AND course.time <= '$selectedCourseEndTime')
+				    OR (SUBSTRING_INDEX(course.time, '~', -1) >= '$selectedCourseStartTime' AND SUBSTRING_INDEX(course.time, '~', -1) <= '$selectedCourseEndTime'))";
+				    $result = $conn->query($sql);
+				    if ($result->num_rows > 0) {
+					     // 衝堂不可加選
+					   	echo "衝堂不可加選";
+				    } 
+                    else { //課名一樣
+                        
+                        $found = false;
+                        foreach ($course as $selectedCourseName) {
+                            if ($course["course_name"] === $selectedCourseName ) {
+                                $found = true;
+                                break;
+                            }
+                        }
+                        if ($found) {
+                            echo "您已經選過該課程";
+                        } 
+                        else {//人數已滿
+                            $current_students = mysqli_query($connection, "SELECT COUNT(*) FROM courseselection WHERE courseselection.course_id = $course_id");
+                            $current_student_count = mysqli_fetch_array($current_students)[0];
+                            // 判断当前已选人数是否达到了课程的限制人数
+                            if ($current_student_count >= $course_max_students) {
+                                echo "課程已滿無法選課";
+                            } 
+                            else{
+                                $sql = "INSERT FROM courseselection WHERE student_id='".$_GET["student_id"]."' AND course_id='".$_POST["add_course_id"]."'";
+                                if($conn->query($sql) == TRUE && mysqli_affected_rows($conn) > 0) {
+                                    echo "加選成功";
+                                //更新課程人數
+                                $sql = "UPDATE course SET current_student = (current_student + 1)";
+                                $conn->query($sql);
+                                
+                            }
+                        }
+                        
+                   }
 
-            $sql = "SELECT course.course_name
-            FROM student
-            INNER JOIN courseselection ON student.student_id = courseselection.student_id
-            INNER JOIN course ON courseselection.course_id = course.course_id
-            WHERE student.student_id = '".$_GET["student_id"]."' AND course.day = '$selectedCourseDay' AND ((course.time >= '$selectedCourseStartTime' AND course.time <= '$selectedCourseEndTime')
-            OR (SUBSTRING_INDEX(course.time, '~', -1) >= '$selectedCourseStartTime' AND SUBSTRING_INDEX(course.time, '~', -1) <= '$selectedCourseEndTime'))";
-            $result = $conn->query($sql);
-            if ($result->num_rows > 0) {
-              // 衝堂不可加選
-              echo "衝堂不可加選";
-          } else {
-              // 可以加選課程
-              echo "加選成功";
-          }
-          }
+				  }
+
+			   }
+		    }
+            
         }
       }
-	// 檢查學生已經選擇的課程的總學分是否超過最高學分限制
-    $sql = "SELECT SUM(course_credit) as total_credit FROM courseselection JOIN course ON courseselection.course_id = course.id WHERE courseselection.student_id = '$student_id'";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-      $row = $result->fetch_assoc();
-      $total_credit = $row["total_credit"] + $course["credit"];
-      if ($total_credit > 30) {
-        echo "學分已達最高上限";
-        exit();
-      }
-    }
+	
 
     }
     
