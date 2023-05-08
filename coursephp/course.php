@@ -113,14 +113,14 @@
           }
         }
       }
-	        // 檢查學生已經選擇的課程的總學分是否超過最高學分限制
-    $sql = "SELECT SUM(credit) as total_credit FROM courseselection JOIN course ON courseselection.course_id = course.id WHERE courseselection.student_id = '$student_id'";
+	// 檢查學生已經選擇的課程的總學分是否超過最高學分限制
+    $sql = "SELECT SUM(course_credit) as total_credit FROM courseselection JOIN course ON courseselection.course_id = course.id WHERE courseselection.student_id = '$student_id'";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
       $row = $result->fetch_assoc();
       $total_credit = $row["total_credit"] + $course["credit"];
       if ($total_credit > 30) {
-        echo "Cannot add course due to maximum credit limit.";
+        echo "學分已達最高上限";
         exit();
       }
     }
