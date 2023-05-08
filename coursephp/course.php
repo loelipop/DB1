@@ -119,7 +119,7 @@
               if ($result->num_rows > 0) {
                 // 衝堂不可加選
                 echo "衝堂不可加選";
-            }else{
+            }else{//是否同名
               $sql = "SELECT course.course_name
               FROM student
               INNER JOIN courseselection ON student.student_id = courseselection.student_id
@@ -127,16 +127,16 @@
               WHERE student.student_id = '".$_GET["student_id"]."' AND course.course_name = '$selectedCourseName' AND course.course_id != '$selectedCourseId'";
               $result = $conn->query($sql);
               if ($result->num_rows > 0) {
-                // 已經選修了相同課名但不同課號的課程
+	      //判斷是否已經選修了相同課名但不同課號的課程
                 echo "不能選修相同課名的課程";
               }else{
+	      // 判断当前已选人数是否达到了课程的限制人数
                 $sql = "SELECT current_student,max_student FROM course WHERE course_id ='$selectedCourseId'";
                 $result= $conn->query($sql);
                 if($result->num_rows > 0){
                   $row = $result->fetch_assoc();
                   $current_student_count = $row["current_student"];
                   $course_max_students = $row["max_student"];
-                  // 判断当前已选人数是否达到了课程的限制人数
                   if($current_student_count >= $course_max_students){
                     echo "課程已滿無法選課";
                   }else{
